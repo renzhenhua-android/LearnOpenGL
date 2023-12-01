@@ -34,6 +34,23 @@ brew install cmake assimp glm glfw freetype
 cmake -S . -B build
 cmake --build build -j$(sysctl -n hw.logicalcpu)
 ```
+### build by .sh
+```
+brew install cmake assimp glm glfw freetype
+sh buildmac.sh
+
+```
+
+### run 
+
+The first parameter is the relative path of the program to be executed. Its default value is "bin/1.getting_started/1.getting_started__1.1.hello_window".
+
+```
+sh run_mac.sh
+
+sh run_mac.sh bin/1.getting_started/1.getting_started__4.2.textures_combined
+```
+
 ## Create Xcode project on Mac platform
 Thanks [@caochao](https://github.com/caochao):
 After cloning the repo, go to the root path of the repo, and run the command below:
