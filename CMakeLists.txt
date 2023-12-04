@@ -62,6 +62,7 @@ else()
 endif(WIN32)
 
 set(CHAPTERS
+    0.test
     1.getting_started
     2.lighting
     3.model_loading
@@ -71,6 +72,9 @@ set(CHAPTERS
     7.in_practice
 )
 
+set(0.test
+    1.1.test
+)
 set(1.getting_started
     1.1.hello_window
     1.2.hello_window_clear
@@ -84,6 +88,7 @@ set(1.getting_started
     3.3.shaders_class
     4.1.textures
     4.2.textures_combined
+    4.3.textures_exercise1
     4.4.textures_exercise2
     4.5.textures_exercise3
     4.6.textures_exercise4

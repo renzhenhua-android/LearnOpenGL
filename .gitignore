@@ -7,3 +7,4 @@ root_directory.h
 cmake_install.cmake
 CMakeCache.txt
 Makefile
+.vscode

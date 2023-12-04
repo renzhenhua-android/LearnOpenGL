@@ -37,7 +37,7 @@ cmake --build build -j$(sysctl -n hw.logicalcpu)
 ### build by .sh
 ```
 brew install cmake assimp glm glfw freetype
-sh buildmac.sh
+sh mac_build.sh
 
 ```
 
