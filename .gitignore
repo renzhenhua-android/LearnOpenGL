@@ -22,6 +22,7 @@ Makefile
 /8.*
 /9.*
 /Debug
+/Release
 /GLAD.dir
 /STB_IMAGE.dir
 /x64
