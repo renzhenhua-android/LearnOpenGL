@@ -13,11 +13,23 @@
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
-
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float deltaTime = 0.0f; // 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
+bool firstMouse = true;
+float lastX = SCR_WIDTH / 2;
+float lastY = SCR_HEIGHT / 2;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float fov   =  45.0f;
 int main()
 {
     // glfw: initialize and configure
@@ -42,6 +54,9 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -50,20 +65,9 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-
     // build and compile our shader zprogram
     // ------------------------------------
     Shader ourShader("6.1.coordinate_systems.vs", "6.1.coordinate_systems.fs");
-
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    // float vertices[] = {
-    //     // positions          // texture coords
-    //      0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
-    //      0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
-    //     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
-    //     -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
-    // };
     float vertices[] = {
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
@@ -202,6 +206,10 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
         // input
         // -----
         processInput(window);
@@ -221,14 +229,25 @@ int main()
         glEnable(GL_DEPTH_TEST);
         // create transformations
         // glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        glm::mat4 view = glm::mat4(1.0f);
+        // glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
         // model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         // model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
         // view 矩阵 观察者在的坐标
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        glm::mat4 view;
+
+        // glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        //  z 前后移动
+        // glm::vec3 cameraPos = glm::vec3(sin(glfwGetTime()) * 10.0f, 0.0f,  cos(glfwGetTime()) * 10.0f);
+        // view = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+        // 自由移动
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
         // projection 中radians 表示远近
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         // retrieve the matrix uniform locations
         unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
         unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
@@ -248,7 +267,6 @@ int main()
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
-            
             if (i % 3 == 0)
                 angle = glfwGetTime() * 25;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
@@ -280,8 +298,60 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    // float cameraSpeed = 0.05f; // adjust accordingly
+    float cameraSpeed = 2.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
+void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  if(fov >= 1.0f && fov <= 45.0f)
+    fov -= yoffset;
+  if(fov <= 1.0f)
+    fov = 1.0f;
+  if(fov >= 45.0f)
+    fov = 45.0f;
+}
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
