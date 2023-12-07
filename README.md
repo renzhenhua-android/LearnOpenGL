@@ -7,6 +7,18 @@ The CMake script knows where to find the libraries so just run CMake script and 
 
 Keep in mind the supplied libraries were generated with a specific compiler version which may or may not work on your system (generating a large batch of link errors). In that case it's advised to build the libraries yourself from the source.
 
+在根目录下执行
+```bash
+cmake .
+```
+编译完成后，会在更目录生成一堆文件，用vs 2022打开 LearnOpenGL.sln，在解决方案资源管理器下 解决方案 右击属性，选择要启动的项目
+![](./image/vs01.png)
+
+### 有三种方式可供选择
+#### 当前选定的内容：打开那个cpp，执行就会运行那个。
+#### 单启动项目：每次运行都执行选定的项目
+#### 多个启动项目：每次运行都执行选定的多个项目
+
 ## Linux building
 First make sure you have CMake, Git, and GCC by typing as root (sudo) `apt-get install g++ cmake git` and then get the required packages:
 Using root (sudo) and type `apt-get install libsoil-dev libglm-dev libassimp-dev libglew-dev libglfw3-dev libxinerama-dev libxcursor-dev  libxi-dev libfreetype-dev libgl1-mesa-dev xorg-dev` .
